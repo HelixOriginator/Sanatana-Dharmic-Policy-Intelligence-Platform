@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HELIX CIVILIZATIONAL OPERATING SYSTEM (H-COS)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script>
+tailwind.config={theme:{extend:{colors:{obsidian:'#050505','dharmic-gold':'#FFD700','quantum-blue':'#00F0FF','neon-purple':'#8B5CF6'},fontFamily:{space:['Space Grotesk','sans-serif'],inter:['Inter','sans-serif']}}}}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#050505;color:#fff;font-family:'Inter',sans-serif;overflow-x:hidden}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#050505}
+::-webkit-scrollbar-thumb{background:rgba(255,215,0,0.3);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,215,0,0.5)}
+
+#particles-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+#mouse-glow{position:fixed;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(0,240,255,0.04) 0%,transparent 70%);pointer-events:none;z-index:1;transform:translate(-50%,-50%);transition:opacity 0.3s}
+#scanlines{position:fixed;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.015) 2px,rgba(0,0,0,0.015) 4px);pointer-events:none;z-index:2}
+
+.section-content{position:relative;z-index:10}
+
+.grid-bg{background-image:linear-gradient(rgba(0,240,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,240,255,0.04) 1px,transparent 1px);background-size:60px 60px;animation:gridMove 20s linear infinite}
+@keyframes gridMove{0%{background-position:0 0}100%{background-position:60px 60px}}
+
+.sacred-geo{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:500px;height:500px;opacity:0.15}
+.sacred-geo .ring{position:absolute;border:1px solid;border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%)}
+.sacred-geo .ring:nth-child(1){width:200px;height:200px;border-color:#FFD700;animation:spinCW 15s linear infinite}
+.sacred-geo .ring:nth-child(2){width:300px;height:300px;border-color:#00F0FF;animation:spinCCW 20s linear infinite}
+.sacred-geo .ring:nth-child(3){width:400px;height:400px;border-color:#8B5CF6;animation:spinCW 25s linear infinite}
+.sacred-geo .ring:nth-child(4){width:500px;height:500px;border-color:rgba(255,215,0,0.3);animation:spinCCW 30s linear infinite}
+.sacred-geo .triangle{position:absolute;top:50%;left:50%;width:0;height:0;border-left:120px solid transparent;border-right:120px solid transparent;border-bottom:208px solid transparent;border-bottom-color:rgba(255,215,0,0.08);transform:translate(-50%,-65%)}
+.sacred-geo .triangle:nth-child(6){transform:translate(-50%,-35%) rotate(180deg);border-bottom-color:rgba(0,240,255,0.08)}
+@keyframes spinCW{to{transform:translate(-50%,-50%) rotate(360deg)}}
+@keyframes spinCCW{to{transform:translate(-50%,-50%) rotate(-360deg)}}
+
+.terminal-text{font-family:'Space Grotesk',monospace;color:#00F0FF;font-size:13px;letter-spacing:0.05em}
+.terminal-cursor{display:inline-block;width:8px;height:16px;background:#00F0FF;animation:blink 1s step-end infinite;vertical-align:middle;margin-left:4px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+.holo-card{position:relative;z-index:0;border-radius:16px;overflow:visible}
+.holo-card::before{content:'';position:absolute;z-index:-2;left:-50%;top:-50%;width:200%;height:200%;background:conic-gradient(from 0deg,transparent 0%,#FFD700 10%,transparent 20%,#00F0FF 30%,transparent 40%,#8B5CF6 50%,transparent 60%,#FFD700 70%,transparent 80%,#00F0FF 90%,transparent 100%);animation:cardSpin 6s linear infinite;opacity:0;transition:opacity 0.5s;pointer-events:none}
+.holo-card:hover::before{opacity:1}
+.holo-card::after{content:'';position:absolute;z-index:-1;inset:1.5px;background:#0a0a0a;border-radius:15px;pointer-events:none}
+@keyframes cardSpin{to{transform:rotate(360deg)}}
+.holo-card-inner{position:relative;background:rgba(10,10,10,0.95);border-radius:15px;padding:2rem;overflow:hidden;height:100%;transition:all 0.5s}
+.holo-card:hover .holo-card-inner{background:rgba(15,15,15,0.95)}
+.holo-card-inner::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,215,0,0.3),transparent);pointer-events:none}
+.holo-card .holo-shimmer{position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.02),transparent);transition:left 0.8s;pointer-events:none}
+.holo-card:hover .holo-shimmer{left:100%}
+
+.launch-btn{position:relative;display:inline-flex;align-items:center;gap:10px;padding:14px 32px;background:linear-gradient(135deg,rgba(255,215,0,0.1),rgba(0,240,255,0.1));border:1px solid rgba(255,215,0,0.25);color:#FFD700;font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;border-radius:10px;text-decoration:none;transition:all 0.4s;overflow:hidden;z-index:1}
+.launch-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,215,0,0.15),rgba(0,240,255,0.15));opacity:0;transition:opacity 0.4s;pointer-events:none}
+.launch-btn:hover::before{opacity:1}
+.launch-btn:hover{border-color:#FFD700;box-shadow:0 0 40px rgba(255,215,0,0.15),0 0 80px rgba(0,240,255,0.05);transform:translateY(-3px);color:#fff}
+.launch-btn span{position:relative;z-index:2}
+.launch-btn svg{position:relative;z-index:2;transition:transform 0.3s}
+.launch-btn:hover svg{transform:translateX(4px)}
+
+.novelty-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;background:rgba(255,215,0,0.08);color:#FFD700;border:1px solid rgba(255,215,0,0.2);border-radius:100px}
+.impact-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;background:rgba(0,240,255,0.08);color:#00F0FF;border:1px solid rgba(0,240,255,0.2);border-radius:100px}
+
+.stack-layer{position:relative;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:24px;transition:all 0.5s;cursor:default}
+.stack-layer:hover{background:rgba(255,255,255,0.05);border-color:rgba(255,215,0,0.2);box-shadow:0 0 40px rgba(255,215,0,0.05);transform:translateX(8px)}
+.stack-layer .layer-num{font-family:'Space Grotesk',sans-serif;font-size:64px;font-weight:700;color:rgba(255,255,255,0.03);position:absolute;top:-10px;right:20px;line-height:1}
+.stack-connector{width:2px;height:32px;background:linear-gradient(to bottom,rgba(255,215,0,0.3),rgba(0,240,255,0.3));margin:0 auto;position:relative}
+.stack-connector::after{content:'';position:absolute;bottom:-3px;left:50%;transform:translateX(-50%);width:8px;height:8px;background:#00F0FF;border-radius:50%;box-shadow:0 0 10px #00F0FF}
+
+.console-line{font-family:'Space Grotesk',monospace;font-size:12px;line-height:2;opacity:0;animation:consoleFadeIn 0.5s forwards}
+@keyframes consoleFadeIn{to{opacity:1}}
+.metric-orb{width:120px;height:120px;border-radius:50%;border:2px solid;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+.metric-orb::before{content:'';position:absolute;inset:-4px;border-radius:50%;border:1px solid;opacity:0.2;animation:orbPulse 2s ease-in-out infinite}
+@keyframes orbPulse{0%,100%{transform:scale(1);opacity:0.2}50%{transform:scale(1.08);opacity:0.4}}
+
+.timeline-node{position:relative;padding-left:40px}
+.timeline-node::before{content:'';position:absolute;left:15px;top:0;bottom:0;width:1px;background:linear-gradient(to bottom,rgba(255,215,0,0.3),rgba(0,240,255,0.3))}
+.timeline-node::after{content:'';position:absolute;left:10px;top:8px;width:12px;height:12px;border-radius:50%;border:2px solid #FFD700;background:#050505;box-shadow:0 0 15px rgba(255,215,0,0.3)}
+.timeline-node:last-child::before{display:none}
+
+.reveal{opacity:0;transform:translateY(40px);transition:all 0.8s cubic-bezier(0.16,1,0.3,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:0.1s}
+.reveal-delay-2{transition-delay:0.2s}
+.reveal-delay-3{transition-delay:0.3s}
+.reveal-delay-4{transition-delay:0.4s}
+
+.glow-gold{text-shadow:0 0 40px rgba(255,215,0,0.3),0 0 80px rgba(255,215,0,0.1)}
+.glow-blue{text-shadow:0 0 30px rgba(0,240,255,0.3)}
+
+.pulse-ring{position:relative}
+.pulse-ring::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:1px solid currentColor;animation:pingRing 2s cubic-bezier(0,0,0.2,1) infinite}
+@keyframes pingRing{0%{transform:scale(1);opacity:0.6}100%{transform:scale(2);opacity:0}}
+
+.float{animation:float 6s ease-in-out infinite}
+.float-delay{animation:float 6s ease-in-out infinite;animation-delay:-3s}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
+
+.data-stream{position:relative;overflow:hidden;height:20px}
+.data-stream::after{content:'01001101 01100101 01110100 01100001';position:absolute;white-space:nowrap;animation:streamScroll 15s linear infinite;font-family:'Space Grotesk',monospace;font-size:11px;color:rgba(0,240,255,0.15)}
+@keyframes streamScroll{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
+
+.gov-ring{border:1px solid;border-radius:50%;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+.gov-ring-1{width:200px;height:200px;border-color:rgba(255,215,0,0.15);animation:spinCW 12s linear infinite}
+.gov-ring-2{width:320px;height:320px;border-color:rgba(0,240,255,0.12);animation:spinCCW 18s linear infinite}
+.gov-ring-3{width:440px;height:440px;border-color:rgba(139,92,246,0.1);animation:spinCW 24s linear infinite}
+
+.section-divider{height:1px;background:linear-gradient(90deg,transparent,rgba(255,215,0,0.2),rgba(0,240,255,0.2),transparent);margin:0 auto;max-width:600px}
+
+#neural-canvas{width:100%;height:450px;border-radius:16px}
+
+@media(max-width:768px){
+  .sacred-geo{width:280px;height:280px}
+  .sacred-geo .ring:nth-child(1){width:120px;height:120px}
+  .sacred-geo .ring:nth-child(2){width:180px;height:180px}
+  .sacred-geo .ring:nth-child(3){width:240px;height:240px}
+  .sacred-geo .ring:nth-child(4){width:280px;height:280px}
+  .sacred-geo .triangle{border-left-width:70px;border-right-width:70px;border-bottom-width:121px}
+  .sacred-geo .triangle:nth-child(6){border-left-width:70px;border-right-width:70px;border-bottom-width:121px}
+  #neural-canvas{height:300px}
+}
+</style>
+</head>
+<body>
+
+<canvas id="particles-canvas"></canvas>
+<div id="mouse-glow"></div>
+<div id="scanlines"></div>
+
+<nav id="floating-nav" class="fixed top-0 left-0 right-0 z-50 transition-all duration-500" style="transform:translateY(-100%)">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-dharmic-gold/20 to-quantum-blue/20 border border-dharmic-gold/30 flex items-center justify-center">
+        <span class="font-space font-bold text-dharmic-gold text-sm">H</span>
+      </div>
+      <span class="font-space font-semibold text-sm tracking-wider text-white/70">H-COS</span>
+    </div>
+    <div class="hidden md:flex items-center gap-8 text-xs tracking-wider text-white/40 uppercase font-space">
+      <a href="#stack" class="hover:text-dharmic-gold transition-colors">Stack</a>
+      <a href="#modules" class="hover:text-dharmic-gold transition-colors">Modules</a>
+      <a href="#network" class="hover:text-dharmic-gold transition-colors">Network</a>
+      <a href="#dharma" class="hover:text-dharmic-gold transition-colors">Engine</a>
+      <a href="#metrics" class="hover:text-dharmic-gold transition-colors">Metrics</a>
+    </div>
+  </div>
+</nav>
+
+<div class="section-content">
+
+<section id="hero" class="relative min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden">
+  <div class="grid-bg absolute inset-0 opacity-40"></div>
+  <div class="sacred-geo">
+    <div class="ring"></div>
+    <div class="ring"></div>
+    <div class="ring"></div>
+    <div class="ring"></div>
+    <div class="triangle"></div>
+    <div class="triangle"></div>
+  </div>
+
+  <div class="relative z-10 text-center max-w-4xl mx-auto">
+    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/[0.03] mb-8">
+      <span class="w-2 h-2 rounded-full bg-quantum-blue pulse-ring text-quantum-blue"></span>
+      <span class="text-xs tracking-widest uppercase text-white/50 font-space">Civilizational Intelligence Online</span>
+    </div>
+
+    <h1 class="font-space font-bold text-5xl md:text-7xl lg:text-8xl tracking-tight leading-[0.95] mb-6 glow-gold">
+      <span class="bg-gradient-to-r from-dharmic-gold via-white to-quantum-blue bg-clip-text text-transparent">HELIX</span>
+      <br>
+      <span class="text-white/90">ORIGINATOR</span>
+    </h1>
+
+    <p class="font-space text-lg md:text-xl text-white/40 tracking-widest uppercase mb-4">The Civilizational Stack</p>
+
+    <p class="text-white/30 text-sm md:text-base max-w-2xl mx-auto leading-relaxed mb-10">
+      Operationalizing Dharma Through Data, Governance, Rights, and Systems Intelligence.
+    </p>
+
+    <div class="max-w-lg mx-auto mb-10 bg-black/60 border border-white/[0.06] rounded-xl p-4 backdrop-blur-sm">
+      <div class="flex items-center gap-2 mb-3">
+        <div class="w-2.5 h-2.5 rounded-full bg-red-500/60"></div>
+        <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/60"></div>
+        <div class="w-2.5 h-2.5 rounded-full bg-green-500/60"></div>
+        <span class="ml-3 text-[10px] text-white/20 font-space tracking-wider uppercase">h-cos-terminal</span>
+      </div>
+      <div class="text-left">
+        <div class="terminal-text" id="terminal-output">
+          <span class="text-dharmic-gold/60">root@hcos</span>:<span class="text-quantum-blue/60">~</span>$ <span id="terminal-msg"></span><span class="terminal-cursor"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+      <a href="#modules" class="launch-btn">
+        <span>Access System Modules</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="#network" class="px-8 py-3.5 rounded-xl border border-white/10 text-white/40 text-sm font-space tracking-wider uppercase hover:border-white/25 hover:text-white/60 transition-all">
+        Explore Network
+      </a>
+    </div>
+  </div>
+
+  <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3">
+    <span class="text-[10px] tracking-[0.3em] uppercase text-white/20 font-space">Scroll</span>
+    <div class="w-5 h-8 rounded-full border border-white/15 flex items-start justify-center p-1.5">
+      <div class="w-1 h-2 rounded-full bg-dharmic-gold/60" style="animation:scrollDot 2s ease-in-out infinite"></div>
+    </div>
+  </div>
+  <style>@keyframes scrollDot{0%,100%{transform:translateY(0);opacity:1}50%{transform:translateY(8px);opacity:0.3}}</style>
+</section>
+
+<section id="stack" class="py-24 md:py-32 px-6">
+  <div class="max-w-4xl mx-auto">
+    <div class="text-center mb-16 reveal">
+      <span class="text-[10px] tracking-[0.3em] uppercase text-dharmic-gold/60 font-space">Architecture</span>
+      <h2 class="font-space font-bold text-3xl md:text-5xl mt-3 tracking-tight bg-gradient-to-r from-white to-white/50 bg-clip-text text-transparent">Civilizational Stack</h2>
+      <p class="text-white/30 text-sm mt-4 max-w-xl mx-auto">Layered infrastructure translating metaphysical foundations into executable governance intelligence.</p>
+    </div>
+
+    <div class="space-y-0">
+      <div class="stack-layer reveal reveal-delay-1">
+        <div class="layer-num">01</div>
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-8 h-8 rounded-lg bg-dharmic-gold/10 flex items-center justify-center"><i data-lucide="book-open" class="w-4 h-4 text-dharmic-gold"></i></div>
+          <h3 class="font-space font-semibold text-white/90 tracking-wide">ONTOLOGY LAYER</h3>
+        </div>
+        <p class="text-white/30 text-sm ml-11">Sanatana Knowledge Systems — Dharma, Ṛta, Consciousness frameworks as foundational operating logic.</p>
+      </div>
+      <div class="stack-connector"></div>
+
+      <div class="stack-layer reveal reveal-delay-2">
+        <div class="layer-num">02</div>
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-8 h-8 rounded-lg bg-quantum-blue/10 flex items-center justify-center"><i data-lucide="cpu" class="w-4 h-4 text-quantum-blue"></i></div>
+          <h3 class="font-space font-semibold text-white/90 tracking-wide">INTELLIGENCE LAYER</h3>
+        </div>
+        <p class="text-white/30 text-sm ml-11">AI + Policy Analytics — Algorithmic governance auditing, friction detection, and implementation scoring.</p>
+      </div>
+      <div class="stack-connector"></div>
+
+      <div class="stack-layer reveal reveal-delay-3">
+        <div class="layer-num">03</div>
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-8 h-8 rounded-lg bg-neon-purple/10 flex items-center justify-center"><i data-lucide="scan-search" class="w-4 h-4 text-neon-purple"></i></div>
+          <h3 class="font-space font-semibold text-white/90 tracking-wide">REALITY VERIFICATION LAYER</h3>
+        </div>
+        <p class="text-white/30 text-sm ml-11">Friction Analysis + Governance Audits — Ground-truth validation against policy intent.</p>
+      </div>
+      <div class="stack-connector"></div>
+
+      <div class="stack-layer reveal reveal-delay-4">
+        <div class="layer-num">04</div>
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-8 h-8 rounded-lg bg-dharmic-gold/10 flex items-center justify-center"><i data-lucide="shield-check" class="w-4 h-4 text-dharmic-gold"></i></div>
+          <h3 class="font-space font-semibold text-white/90 tracking-wide">RIGHTS & CITIZEN DEFENSE LAYER</h3>
+        </div>
+        <p class="text-white/30 text-sm ml-11">Constitutional Infrastructure — Mapping citizen protections to institutional accountability frameworks.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<section id="modules" class="py-24 md:py-32 px-6">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-16 reveal">
+      <span class="text-[10px] tracking-[0.3em] uppercase text-quantum-blue/60 font-space">Command Center</span>
+      <h2 class="font-space font-bold text-3xl md:text-5xl mt-3 tracking-tight bg-gradient-to-r from-white to-white/50 bg-clip-text text-transparent">System Modules</h2>
+      <p class="text-white/30 text-sm mt-4 max-w-xl mx-auto">Four interconnected intelligence nodes forming the operational backbone of civilizational governance.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+      <div class="holo-card reveal reveal-delay-1">
+        <div class="holo-card-inner">
+          <div class="holo-shimmer"></div>
+          <div class="relative z-10">
+            <div class="flex items-start justify-between mb-5">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-dharmic-gold/15 to-dharmic-gold/5 border border-dharmic-gold/20 flex items-center justify-center float">
+                <i data-lucide="network" class="w-6 h-6 text-dharmic-gold"></i>
+              </div>
+              <span class="text-[10px] tracking-widest text-white/20 font-space uppercase mt-2">Module 01</span>
+            </div>
+            <h3 class="font-space font-bold text-xl text-white/90 mb-3 tracking-tight">Sanatana Knowledge Bank</h3>
+            <p class="text-white/35 text-sm leading-relaxed mb-5">A living civilizational ontology infrastructure translating Sanskrit metaphysics into systems architecture, computational logic, governance philosophy, psychometrics, and modern scientific interpretation. Contains numerous interconnected sub-websites as the foundational knowledge layer.</p>
+            <div class="flex flex-wrap gap-2 mb-6">
+              <span class="novelty-badge">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+                Living Ontological Civilization Engine
+              </span>
+              <span class="impact-badge">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                Transforms ancient metaphysics into systems intelligence
+              </span>
+            </div>
+            <a href="https://helixoriginator.github.io/Sanatana-Knowledge-Bank-/" target="_blank" rel="noopener noreferrer" class="launch-btn w-full justify-center">
+              <span>Launch Knowledge Bank</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="holo-card reveal reveal-delay-2">
+        <div class="holo-card-inner">
+          <div class="holo-shimmer"></div>
+          <div class="relative z-10">
+            <div class="flex items-start justify-between mb-5">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-quantum-blue/15 to-quantum-blue/5 border border-quantum-blue/20 flex items-center justify-center float-delay">
+                <i data-lucide="brain" class="w-6 h-6 text-quantum-blue"></i>
+              </div>
+              <span class="text-[10px] tracking-widest text-white/20 font-space uppercase mt-2">Module 02</span>
+            </div>
+            <h3 class="font-space font-bold text-xl text-white/90 mb-3 tracking-tight">Opal Intelligence Engine</h3>
+            <p class="text-white/35 text-sm leading-relaxed mb-5">A decentralized policy intelligence and governance audit engine capable of evaluating implementation quality, institutional friction, and administrative inefficiencies across complex governance systems.</p>
+            <div class="flex flex-wrap gap-2 mb-6">
+              <span class="novelty-badge">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+                Algorithmic Governance Auditor
+              </span>
+              <span class="impact-badge">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                Transitions governance to measurable accountability
+              </span>
+            </div>
+            <a href="https://opal.google/app/1Ms-1bHVXqp99u4B_uH7ejvWEa0ZXDk71" target="_blank" rel="noopener noreferrer" class="launch-btn w-full justify-center" style="background:linear-gradient(135deg,rgba(0,240,255,0.1),rgba(139,92,246,0.1));border-color:rgba(0,240,255,0.25);color:#00F0FF">
+              <span>Launch Opal Engine</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="holo-card reveal reveal-delay-3">
+        <div class="holo-card-inner">
+          <div class="holo-shimmer"></div>
+          <div class="relative z-10">
+            <div class="flex items-start justify-between mb-5">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-neon-purple/15 to-neon-purple/5 border border-neon-purple/20 flex items-center justify-center float">
+                <i data-lucide="bar-chart-3" class="w-6 h-6 text-neon-purple"></i>
+              </div>
+              <span class="text-[10px] tracking-widest text-white/20 font-space uppercase mt-2">Module 03</span>
+            </div>
+            <h3 class="font-space font-bold text-xl text-white/90 mb-3 tracking-tight">PM-Kisan Policy Intelligence</h3>
+            <p class="text-white/35 text-sm leading-relaxed mb-5">A real-world implementation friction analysis system examining the gap between policy intent and citizen-level execution realities in India's flagship agricultural income support program.</p>
+            <div class="flex flex-wrap gap-2 mb-6">
+              <span class="novelty-badge">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+                Ground-Reality Governance Analytics
+              </span>
+              <span class="impact-badge">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                Infrastructure for zero-leakage policy diagnostics
+              </span>
+            </div>
+            <a href="https://helixoriginator.github.io/pm-kisan-policy-intelligence-report/" target="_blank" rel="noopener noreferrer" class="launch-btn w-full justify-center" style="background:linear-gradient(135deg,rgba(139,92,246,0.1),rgba(255,215,0,0.1));border-color:rgba(139,92,246,0.25);color:#8B5CF6">
+              <span>Launch Policy Report</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="holo-card reveal reveal-delay-4">
+        <div class="holo-card-inner">
+          <div class="holo-shimmer"></div>
+          <div class="relative z-10">
+            <div class="flex items-start justify-between mb-5">
+              <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-dharmic-gold/15 to-quantum-blue/5 border border-dharmic-gold/20 flex items-center justify-center float-delay">
+                <i data-lucide="shield" class="w-6 h-6 text-dharmic-gold"></i>
+              </div>
+              <span class="text-[10px] tracking-widest text-white/20 font-space uppercase mt-2">Module 04</span>
+            </div>
+            <h3 class="font-space font-bold text-xl text-white/90 mb-3 tracking-tight">Bharat Rights Dashboard</h3>
+            <p class="text-white/35 text-sm leading-relaxed mb-5">A constitutional rights intelligence interface mapping citizen protections to institutional duties using governance accountability frameworks rooted in dharmic civic defense principles.</p>
+            <div class="flex flex-wrap gap-2 mb-6">
+              <span class="novelty-badge">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+                Dharmic Civic Defense Interface
+              </span>
+              <span class="impact-badge">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                Empowers citizens through governance transparency
+              </span>
+            </div>
+            <a href="https://helixoriginator.github.io/bharat-rights-dashboard/" target="_blank" rel="noopener noreferrer" class="launch-btn w-full justify-center" style="background:linear-gradient(135deg,rgba(255,215,0,0.1),rgba(0,240,255,0.1));border-color:rgba(255,215,0,0.25);color:#FFD700">
+              <span>Launch Rights Dashboard</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<section id="network" class="py-24 md:py-32 px-6">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-12 reveal">
+      <span class="text-[10px] tracking-[0.3em] uppercase text-neon-purple/60 font-space">Neural Civilization Graph</span>
+      <h2 class="font-space font-bold text-3xl md:text-5xl mt-3 tracking-tight bg-gradient-to-r from-white to-white/50 bg-clip-text text-transparent">Sanatana Knowledge Network</h2>
+      <p class="text-white/30 text-sm mt-4 max-w-xl mx-auto">Ancient knowledge rendered as executable systems architecture — a living interconnected intelligence graph.</p>
+    </div>
+    <div class="reveal">
+      <canvas id="neural-canvas" class="w-full border border-white/[0.04] rounded-2xl bg-white/[0.01]"></canvas>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<section id="dharma" class="py-24 md:py-32 px-6">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-16 reveal">
+      <span class="text-[10px] tracking-[0.3em] uppercase text-dharmic-gold/60 font-space">AI Console</span>
+      <h2 class="font-space font-bold text-3xl md:text-5xl mt-3 tracking-tight bg-gradient-to-r from-white to-white/50 bg-clip-text text-transparent">Computational Dharma Engine</h2>
+      <p class="text-white/30 text-sm mt-4 max-w-xl mx-auto">Translating Sanskrit conceptual frameworks into measurable governance diagnostics.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="reveal reveal-delay-1 bg-black/40 border border-white/[0.06] rounded-2xl p-6 backdrop-blur-sm">
+        <div class="flex items-center gap-2 mb-5">
+          <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+          <span class="text-[10px] tracking-widest uppercase text-white/30 font-space">Dharma Engine v3.7 — Active</span>
+        </div>
+        <div class="space-y-4 mb-6">
+          <div class="flex items-center gap-3 text-xs font-space flex-wrap">
+            <span class="px-3 py-1.5 bg-dharmic-gold/10 text-dharmic-gold rounded-lg border border-dharmic-gold/15 whitespace-nowrap">Policy</span>
+            <svg width="20" height="12" viewBox="0 0 20 12" class="text-white/15 shrink-0"><path d="M0 6h16m0 0l-4-4m4 4l-4 4" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+            <span class="px-3 py-1.5 bg-quantum-blue/10 text-quantum-blue rounded-lg border border-quantum-blue/15 whitespace-nowrap">Dharma Logic</span>
+            <svg width="20" height="12" viewBox="0 0 20 12" class="text-white/15 shrink-0"><path d="M0 6h16m0 0l-4-4m4 4l-4 4" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+            <span class="px-3 py-1.5 bg-neon-purple/10 text-neon-purple rounded-lg border border-neon-purple/15 whitespace-nowrap">Friction</span>
+            <svg width="20" height="12" viewBox="0 0 20 12" class="text-white/15 shrink-0"><path d="M0 6h16m0 0l-4-4m4 4l-4 4" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+            <span class="px-3 py-1.5 bg-dharmic-gold/10 text-dharmic-gold/70 rounded-lg border border-dharmic-gold/10 whitespace-nowrap">Outcome</span>
+          </div>
+          <div class="flex items-center gap-3 text-xs font-space flex-wrap">
+            <span class="px-3 py-1.5 bg-quantum-blue/10 text-quantum-blue rounded-lg border border-quantum-blue/15 whitespace-nowrap">Rights</span>
+            <svg width="20" height="12" viewBox="0 0 20 12" class="text-white/15 shrink-0"><path d="M0 6h16m0 0l-4-4m4 4l-4 4" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+            <span class="px-3 py-1.5 bg-dharmic-gold/10 text-dharmic-gold rounded-lg border border-dharmic-gold/15 whitespace-nowrap">Duty</span>
+            <svg width="20" height="12" viewBox="0 0 20 12" class="text-white/15 shrink-0"><path d="M0 6h16m0 0l-4-4m4 4l-4 4" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+            <span class="px-3 py-1.5 bg-neon-purple/10 text-neon-purple rounded-lg border border-neon-purple/15 whitespace-nowrap">Accountability</span>
+          </div>
+          <div class="flex items-center gap-3 text-xs font-space flex-wrap">
+            <span class="px-3 py-1.5 bg-dharmic-gold/10 text-dharmic-gold rounded-lg border border-dharmic-gold/15 whitespace-nowrap">Sanskrit</span>
+            <svg width="20" height="12" viewBox="0 0 20 12" class="text-white/15 shrink-0"><path d="M0 6h16m0 0l-4-4m4 4l-4 4" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+            <span class="px-3 py-1.5 bg-quantum-blue/10 text-quantum-blue rounded-lg border border-quantum-blue/15 whitespace-nowrap">Translation</span>
+            <svg width="20" height="12" viewBox="0 0 20 12" class="text-white/15 shrink-0"><path d="M0 6h16m0 0l-4-4m4 4l-4 4" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+            <span class="px-3 py-1.5 bg-dharmic-gold/10 text-dharmic-gold/70 rounded-lg border border-dharmic-gold/10 whitespace-nowrap">Application</span>
+          </div>
+        </div>
+        <div class="data-stream rounded-lg bg-white/[0.02] px-3"></div>
+        <div class="mt-5 space-y-1 font-space text-[11px] text-white/20" id="console-log">
+          <div class="console-line" style="animation-delay:0s"><span class="text-green-400/50">[OK]</span> Dharma logic module loaded</div>
+          <div class="console-line" style="animation-delay:0.3s"><span class="text-green-400/50">[OK]</span> Policy-friction mapper initialized</div>
+          <div class="console-line" style="animation-delay:0.6s"><span class="text-green-400/50">[OK]</span> Rights-duty correlator active</div>
+          <div class="console-line" style="animation-delay:0.9s"><span class="text-quantum-blue/50">[SYS]</span> Sanskrit ontology parser v2.1 ready</div>
+          <div class="console-line" style="animation-delay:1.2s"><span class="text-dharmic-gold/50">[RDY]</span> Computational Dharma Engine operational</div>
+        </div>
+      </div>
+
+      <div class="reveal reveal-delay-2 grid grid-cols-2 gap-6">
+        <div class="flex flex-col items-center justify-center bg-black/40 border border-white/[0.06] rounded-2xl p-6 backdrop-blur-sm">
+          <div class="metric-orb border-dharmic-gold/40 mb-4">
+            <span class="font-space font-bold text-2xl text-dharmic-gold glow-gold" data-count="94">0</span>
+            <span class="text-[9px] text-dharmic-gold/50 tracking-wider uppercase mt-0.5">%</span>
+          </div>
+          <span class="text-xs text-white/30 font-space tracking-wider uppercase">Governance Integrity</span>
+        </div>
+        <div class="flex flex-col items-center justify-center bg-black/40 border border-white/[0.06] rounded-2xl p-6 backdrop-blur-sm">
+          <div class="metric-orb border-quantum-blue/40 mb-4">
+            <span class="font-space font-bold text-2xl text-quantum-blue glow-blue" data-count="12">0</span>
+            <span class="text-[9px] text-quantum-blue/50 tracking-wider uppercase mt-0.5">pts</span>
+          </div>
+          <span class="text-xs text-white/30 font-space tracking-wider uppercase">Friction Index</span>
+        </div>
+        <div class="flex flex-col items-center justify-center bg-black/40 border border-white/[0.06] rounded-2xl p-6 backdrop-blur-sm">
+          <div class="metric-orb border-neon-purple/40 mb-4">
+            <span class="font-space font-bold text-2xl text-neon-purple" data-count="87">0</span>
+            <span class="text-[9px] text-neon-purple/50 tracking-wider uppercase mt-0.5">%</span>
+          </div>
+          <span class="text-xs text-white/30 font-space tracking-wider uppercase">Cognitive Sovereignty</span>
+        </div>
+        <div class="flex flex-col items-center justify-center bg-black/40 border border-white/[0.06] rounded-2xl p-6 backdrop-blur-sm">
+          <div class="metric-orb border-dharmic-gold/40 mb-4">
+            <span class="font-space font-bold text-2xl text-dharmic-gold/80" data-count="23">0</span>
+            <span class="text-[9px] text-dharmic-gold/40 tracking-wider uppercase mt-0.5">%</span>
+          </div>
+          <span class="text-xs text-white/30 font-space tracking-wider uppercase">Policy Leak Detected</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<section id="metrics" class="py-24 md:py-32 px-6">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-16 reveal">
+      <span class="text-[10px] tracking-[0.3em] uppercase text-quantum-blue/60 font-space">Infrastructure</span>
+      <h2 class="font-space font-bold text-3xl md:text-5xl mt-3 tracking-tight bg-gradient-to-r from-white to-white/50 bg-clip-text text-transparent">Research Infrastructure</h2>
+      <p class="text-white/30 text-sm mt-4 max-w-xl mx-auto">Sovereign, independent, decolonial research output at civilizational scale.</p>
+    </div>
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 md:gap-6">
+      <div class="reveal reveal-delay-1 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 text-center hover:border-dharmic-gold/20 transition-all duration-500 hover:bg-white/[0.04]">
+        <span class="font-space font-bold text-3xl md:text-4xl text-dharmic-gold glow-gold counter" data-target="264">0</span>
+        <span class="font-space text-dharmic-gold/50 text-lg">+</span>
+        <p class="text-[10px] text-white/30 tracking-widest uppercase mt-3 font-space">DOI-Linked<br>Outputs</p>
+      </div>
+      <div class="reveal reveal-delay-2 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 text-center hover:border-quantum-blue/20 transition-all duration-500 hover:bg-white/[0.04]">
+        <span class="font-space font-bold text-3xl md:text-4xl text-quantum-blue glow-blue counter" data-target="390">0</span>
+        <span class="font-space text-quantum-blue/50 text-lg">+</span>
+        <p class="text-[10px] text-white/30 tracking-widest uppercase mt-3 font-space">Research<br>Platforms</p>
+      </div>
+      <div class="reveal reveal-delay-3 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 text-center hover:border-neon-purple/20 transition-all duration-500 hover:bg-white/[0.04]">
+        <span class="font-space font-bold text-3xl md:text-4xl text-neon-purple counter" data-target="241">0</span>
+        <span class="font-space text-neon-purple/50 text-lg">+</span>
+        <p class="text-[10px] text-white/30 tracking-widest uppercase mt-3 font-space">Code<br>Repositories</p>
+      </div>
+      <div class="reveal reveal-delay-4 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 text-center hover:border-dharmic-gold/20 transition-all duration-500 hover:bg-white/[0.04] col-span-2 lg:col-span-1">
+        <span class="font-space font-bold text-xl md:text-2xl text-dharmic-gold/80">SOVEREIGN</span>
+        <p class="text-[10px] text-white/30 tracking-widest uppercase mt-3 font-space">Independent<br>Infrastructure</p>
+      </div>
+      <div class="reveal reveal-delay-4 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 text-center hover:border-quantum-blue/20 transition-all duration-500 hover:bg-white/[0.04] col-span-2 lg:col-span-1">
+        <span class="font-space font-bold text-xl md:text-2xl text-quantum-blue/80">GOVT<br>RECOGNIZED</span>
+        <p class="text-[10px] text-white/30 tracking-widest uppercase mt-3 font-space">Copyrights &<br>Acknowledgements</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<section id="timeline" class="py-24 md:py-32 px-6">
+  <div class="max-w-3xl mx-auto">
+    <div class="text-center mb-16 reveal">
+      <span class="text-[10px] tracking-[0.3em] uppercase text-dharmic-gold/60 font-space">Evolution</span>
+      <h2 class="font-space font-bold text-3xl md:text-5xl mt-3 tracking-tight bg-gradient-to-r from-white to-white/50 bg-clip-text text-transparent">Civilizational Timeline</h2>
+    </div>
+    <div class="space-y-10">
+      <div class="timeline-node reveal reveal-delay-1">
+        <span class="font-space font-bold text-dharmic-gold text-sm">PHASE 01</span>
+        <h3 class="font-space font-semibold text-white/80 text-lg mb-1">Knowledge Formation</h3>
+        <p class="text-white/30 text-sm leading-relaxed">Deep study and synthesis of Sanatana Dharma, Sanskrit metaphysics, Indic epistemology, and their structural mapping to modern systems theory.</p>
+      </div>
+      <div class="timeline-node reveal reveal-delay-2">
+        <span class="font-space font-bold text-quantum-blue text-sm">PHASE 02</span>
+        <h3 class="font-space font-semibold text-white/80 text-lg mb-1">Research Infrastructure Expansion</h3>
+        <p class="text-white/30 text-sm leading-relaxed">Systematic creation of 390+ platforms, 241+ repositories, and 264+ DOI-linked outputs forming an independent sovereign knowledge grid.</p>
+      </div>
+      <div class="timeline-node reveal reveal-delay-3">
+        <span class="font-space font-bold text-neon-purple text-sm">PHASE 03</span>
+        <h3 class="font-space font-semibold text-white/80 text-lg mb-1">Governance Intelligence Systems</h3>
+        <p class="text-white/30 text-sm leading-relaxed">Development of policy audit engines, friction analysis frameworks, and rights-defense architectures grounded in real-world implementation data.</p>
+      </div>
+      <div class="timeline-node reveal reveal-delay-4">
+        <span class="font-space font-bold text-dharmic-gold/70 text-sm">PHASE 04</span>
+        <h3 class="font-space font-semibold text-white/80 text-lg mb-1">Computational Dharma Models</h3>
+        <p class="text-white/30 text-sm leading-relaxed">Translation of dharmic logic, Ṛta frameworks, and consciousness models into computational pipelines and measurable governance metrics.</p>
+      </div>
+      <div class="timeline-node reveal">
+        <span class="font-space font-bold text-white/50 text-sm">PHASE 05</span>
+        <h3 class="font-space font-semibold text-white/80 text-lg mb-1">Civilizational Intelligence Infrastructure</h3>
+        <p class="text-white/30 text-sm leading-relaxed">Convergence into H-COS — a unified operating system where ancient knowledge becomes executable sovereign intelligence at civilizational scale.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<section id="governance" class="py-24 md:py-32 px-6">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-16 reveal">
+      <span class="text-[10px] tracking-[0.3em] uppercase text-neon-purple/60 font-space">Command</span>
+      <h2 class="font-space font-bold text-3xl md:text-5xl mt-3 tracking-tight bg-gradient-to-r from-white to-white/50 bg-clip-text text-transparent">Sovereign Governance Interface</h2>
+      <p class="text-white/30 text-sm mt-4 max-w-xl mx-auto">Research as civic infrastructure — mapping the citizen-state relationship through intelligence.</p>
+    </div>
+    <div class="reveal relative flex items-center justify-center" style="min-height:400px">
+      <div class="gov-ring gov-ring-1 hidden md:block"></div>
+      <div class="gov-ring gov-ring-2 hidden md:block"></div>
+      <div class="gov-ring gov-ring-3 hidden md:block"></div>
+      <div class="relative z-10 text-center">
+        <div class="w-24 h-24 rounded-full border-2 border-dharmic-gold/30 flex items-center justify-center mx-auto mb-6" style="box-shadow:0 0 60px rgba(255,215,0,0.1),inset 0 0 30px rgba(255,215,0,0.05)">
+          <i data-lucide="crown" class="w-10 h-10 text-dharmic-gold/70"></i>
+        </div>
+        <h3 class="font-space font-bold text-xl text-white/80 mb-2">Dharmic Governance Core</h3>
+        <p class="text-white/25 text-sm max-w-xs mx-auto mb-6">Where constitutional duty meets civilizational ethics through computational accountability.</p>
+        <div class="flex flex-wrap justify-center gap-3">
+          <span class="px-4 py-2 text-[10px] tracking-widest uppercase bg-dharmic-gold/5 text-dharmic-gold/60 border border-dharmic-gold/10 rounded-full font-space">Citizen Rights</span>
+          <span class="px-4 py-2 text-[10px] tracking-widest uppercase bg-quantum-blue/5 text-quantum-blue/60 border border-quantum-blue/10 rounded-full font-space">State Duty</span>
+          <span class="px-4 py-2 text-[10px] tracking-widest uppercase bg-neon-purple/5 text-neon-purple/60 border border-neon-purple/10 rounded-full font-space">Accountability</span>
+          <span class="px-4 py-2 text-[10px] tracking-widest uppercase bg-dharmic-gold/5 text-dharmic-gold/60 border border-dharmic-gold/10 rounded-full font-space">Transparency</span>
+        </div>
+      </div>
+      <div class="hidden md:block absolute top-10 left-20 w-16 h-16 rounded-xl bg-black/60 border border-dharmic-gold/15 flex items-center justify-center float">
+        <i data-lucide="scale" class="w-6 h-6 text-dharmic-gold/50"></i>
+      </div>
+      <div class="hidden md:block absolute top-20 right-24 w-14 h-14 rounded-xl bg-black/60 border border-quantum-blue/15 flex items-center justify-center float-delay">
+        <i data-lucide="lock" class="w-5 h-5 text-quantum-blue/50"></i>
+      </div>
+      <div class="hidden md:block absolute bottom-16 left-28 w-14 h-14 rounded-xl bg-black/60 border border-neon-purple/15 flex items-center justify-center float-delay">
+        <i data-lucide="eye" class="w-5 h-5 text-neon-purple/50"></i>
+      </div>
+      <div class="hidden md:block absolute bottom-10 right-20 w-16 h-16 rounded-xl bg-black/60 border border-dharmic-gold/15 flex items-center justify-center float">
+        <i data-lucide="landmark" class="w-6 h-6 text-dharmic-gold/50"></i>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="relative py-16 px-6 border-t border-white/[0.04]">
+  <div class="absolute inset-0 grid-bg opacity-20"></div>
+  <div class="relative z-10 max-w-4xl mx-auto text-center">
+    <div class="section-divider mb-10"></div>
+    <div class="flex items-center justify-center gap-3 mb-6">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-dharmic-gold/20 to-quantum-blue/20 border border-dharmic-gold/30 flex items-center justify-center">
+        <span class="font-space font-bold text-dharmic-gold text-lg">H</span>
+      </div>
+      <span class="font-space font-semibold text-sm tracking-wider text-white/50">H-COS</span>
+    </div>
+    <p class="text-white/20 text-xs tracking-widest uppercase font-space mb-8">Powered by Independent Decolonial Research Infrastructure</p>
+    <div class="w-12 h-px bg-gradient-to-r from-transparent via-dharmic-gold/30 to-transparent mx-auto mb-8"></div>
+    <p class="text-white/40 text-sm font-space font-medium tracking-wide">Created by <span class="text-dharmic-gold/80">Kallol Chakrabarti</span>, <span class="text-quantum-blue/70">Global Independent Researcher</span></p>
+  </div>
+</footer>
+
+</div>
+
+<script>
+(function(){
+  var canvas=document.getElementById('particles-canvas');
+  var ctx=canvas.getContext('2d');
+  var w,h,particles=[];
+  function resize(){w=canvas.width=window.innerWidth;h=canvas.height=window.innerHeight}
+  resize();window.addEventListener('resize',resize);
+  function Particle(){this.reset()}
+  Particle.prototype.reset=function(){this.x=Math.random()*w;this.y=Math.random()*h;this.vx=(Math.random()-0.5)*0.3;this.vy=(Math.random()-0.5)*0.3;this.r=Math.random()*1.5+0.5;this.color=Math.random()>0.5?'rgba(255,215,0,':'rgba(0,240,255,';this.alpha=Math.random()*0.4+0.1};
+  Particle.prototype.update=function(){this.x+=this.vx;this.y+=this.vy;if(this.x<0||this.x>w)this.vx*=-1;if(this.y<0||this.y>h)this.vy*=-1};
+  Particle.prototype.draw=function(){ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,Math.PI*2);ctx.fillStyle=this.color+this.alpha+')';ctx.fill()};
+  for(var i=0;i<60;i++)particles.push(new Particle());
+  function animate(){ctx.clearRect(0,0,w,h);for(var i=0;i<particles.length;i++){particles[i].update();particles[i].draw()}for(var i=0;i<particles.length;i++){for(var j=i+1;j<particles.length;j++){var dx=particles[i].x-particles[j].x;var dy=particles[i].y-particles[j].y;var dist=Math.sqrt(dx*dx+dy*dy);if(dist<150){ctx.beginPath();ctx.moveTo(particles[i].x,particles[i].y);ctx.lineTo(particles[j].x,particles[j].y);ctx.strokeStyle='rgba(255,215,0,'+(1-dist/150)*0.06+')';ctx.lineWidth=0.5;ctx.stroke()}}}requestAnimationFrame(animate)}
+  animate();
+})();
+
+(function(){
+  var glow=document.getElementById('mouse-glow');
+  var mx=0,my=0,gx=0,gy=0;
+  document.addEventListener('mousemove',function(e){mx=e.clientX;my=e.clientY});
+  function update(){gx+=(mx-gx)*0.08;gy+=(my-gy)*0.08;glow.style.left=gx+'px';glow.style.top=gy+'px';requestAnimationFrame(update)}
+  update();
+})();
+
+(function(){
+  var nav=document.getElementById('floating-nav');
+  window.addEventListener('scroll',function(){
+    if(window.scrollY>600){nav.style.transform='translateY(0)';nav.style.background='rgba(5,5,5,0.85)';nav.style.backdropFilter='blur(20px)';nav.style.borderBottom='1px solid rgba(255,255,255,0.04)'}
+    else{nav.style.transform='translateY(-100%)'}
+  });
+})();
+
+(function(){
+  var messages=['INITIALIZING CIVILIZATIONAL OS...','LOADING COMPUTATIONAL DHARMA ENGINE...','MAPPING POLICY FRICTION VECTORS...','SYNCHRONIZING RIGHTS INFRASTRUCTURE...','EXECUTING SOVEREIGN KNOWLEDGE PROTOCOL...','CALIBRATING SANATANA ONTOLOGY PARSER...','ACTIVATING GOVERNANCE INTEGRITY SCANNER...','ENUMERATING CIVILIZATIONAL INTELLIGENCE NODES...'];
+  var el=document.getElementById('terminal-msg');
+  var idx=0,charIdx=0,deleting=false,delay=50;
+  function type(){var msg=messages[idx];if(!deleting){el.textContent=msg.substring(0,charIdx+1);charIdx++;if(charIdx===msg.length){deleting=true;delay=2000}else{delay=40+Math.random()*40}}else{el.textContent=msg.substring(0,charIdx-1);charIdx--;if(charIdx===0){deleting=false;idx=(idx+1)%messages.length;delay=400}else{delay=20}}setTimeout(type,delay)}
+  type();
+})();
+
+(function(){
+  var reveals=document.querySelectorAll('.reveal');
+  var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add('visible')}})},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
+  reveals.forEach(function(r){obs.observe(r)});
+})();
+
+(function(){
+  var counters=document.querySelectorAll('.counter');
+  var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){var el=e.target;var target=parseInt(el.dataset.target);var current=0;var increment=target/60;var timer=setInterval(function(){current+=increment;if(current>=target){current=target;clearInterval(timer)}el.textContent=Math.floor(current)},25);obs.unobserve(el)}})},{threshold:0.5});
+  counters.forEach(function(c){obs.observe(c)});
+})();
+
+(function(){
+  var orbs=document.querySelectorAll('[data-count]');
+  var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){var el=e.target;var target=parseInt(el.dataset.count);var current=0;var increment=target/50;var timer=setInterval(function(){current+=increment;if(current>=target){current=target;clearInterval(timer)}el.textContent=Math.floor(current)},30);obs.unobserve(el)}})},{threshold:0.5});
+  orbs.forEach(function(o){obs.observe(o)});
+})();
+
+(function(){
+  var canvas=document.getElementById('neural-canvas');
+  var ctx=canvas.getContext('2d');
+  var w,h,animating=false;
+  var nodes=[
+    {label:'Dharma',x:0.5,y:0.12,color:'#FFD700',size:28},
+    {label:'Ṛta',x:0.22,y:0.28,color:'#FFD700',size:22},
+    {label:'Consciousness',x:0.78,y:0.28,color:'#00F0FF',size:24},
+    {label:'Governance',x:0.12,y:0.52,color:'#8B5CF6',size:22},
+    {label:'Systems Theory',x:0.42,y:0.48,color:'#00F0FF',size:20},
+    {label:'AI Ethics',x:0.68,y:0.48,color:'#FFD700',size:20},
+    {label:'Psychometrics',x:0.88,y:0.52,color:'#8B5CF6',size:18},
+    {label:'Quantum Models',x:0.28,y:0.73,color:'#00F0FF',size:18},
+    {label:'Constitutional Logic',x:0.55,y:0.76,color:'#FFD700',size:20},
+    {label:'Incentive Structures',x:0.8,y:0.73,color:'#8B5CF6',size:16},
+    {label:'Cognitive Sovereignty',x:0.5,y:0.93,color:'#FFD700',size:22}
+  ];
+  var edges=[[0,1],[0,2],[0,4],[0,5],[1,3],[1,4],[2,5],[2,6],[3,7],[4,7],[4,8],[5,8],[5,9],[6,9],[7,10],[8,10],[9,10],[3,4],[5,6],[1,7],[2,9]];
+  var particles=[];
+  edges.forEach(function(_,i){for(var j=0;j<2;j++){particles.push({edge:i,t:Math.random(),speed:0.002+Math.random()*0.003})}});
+  var time=0;
+  function resize(){var rect=canvas.getBoundingClientRect();canvas.width=rect.width*window.devicePixelRatio;canvas.height=rect.height*window.devicePixelRatio;ctx.scale(window.devicePixelRatio,window.devicePixelRatio);w=rect.width;h=rect.height}
+  function draw(){ctx.clearRect(0,0,w,h);time+=0.01;
+    edges.forEach(function(e){var na=nodes[e[0]],nb=nodes[e[1]];ctx.beginPath();ctx.moveTo(na.x*w,na.y*h);ctx.lineTo(nb.x*w,nb.y*h);ctx.strokeStyle='rgba(255,255,255,0.04)';ctx.lineWidth=1;ctx.stroke()});
+    particles.forEach(function(p){p.t+=p.speed;if(p.t>1)p.t=0;var e=edges[p.edge];var na=nodes[e[0]],nb=nodes[e[1]];var px=na.x*w+(nb.x*w-na.x*w)*p.t;var py=na.y*h+(nb.y*h-na.y*h)*p.t;ctx.beginPath();ctx.arc(px,py,1.5,0,Math.PI*2);ctx.fillStyle=na.color+'80';ctx.fill()});
+    nodes.forEach(function(n){var nx=n.x*w,ny=n.y*h;var pulse=Math.sin(time*2+n.x*10)*3;var grad=ctx.createRadialGradient(nx,ny,0,nx,ny,n.size+pulse+10);grad.addColorStop(0,n.color+'15');grad.addColorStop(1,'transparent');ctx.beginPath();ctx.arc(nx,ny,n.size+pulse+10,0,Math.PI*2);ctx.fillStyle=grad;ctx.fill();ctx.beginPath();ctx.arc(nx,ny,n.size*0.5+pulse*0.3,0,Math.PI*2);ctx.fillStyle='rgba(5,5,5,0.9)';ctx.fill();ctx.strokeStyle=n.color+'40';ctx.lineWidth=1;ctx.stroke();ctx.fillStyle=n.color+'CC';ctx.font='600 '+(n.size>20?'11':'10')+'px "Space Grotesk",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(n.label,nx,ny)});
+    if(animating)requestAnimationFrame(draw)}
+  var obs=new IntersectionObserver(function(entries){entries.forEach(function(e){if(e.isIntersecting){if(!animating){resize();animating=true;draw()}}else{animating=false}})},{threshold:0.1});
+  obs.observe(canvas);window.addEventListener('resize',function(){if(animating)resize()});
+})();
+
+lucide.createIcons();
+</script>
+</body>
+</html>
